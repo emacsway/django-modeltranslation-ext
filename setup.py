@@ -17,7 +17,7 @@ setup(
 
     author = "Ivan Zakrevsky",
     author_email = "ivzak@yandex.ru",
-    description = "Extension of django-modeltranslation",
+    description = "Extension of django-modeltranslation.",
     long_description=open(os.path.join(os.path.dirname(__file__), 'README')).read(),
     license = "BSD License",
     keywords = "django i18n multilingual translation",
