@@ -107,7 +107,7 @@ def ml_manager(superclass):
 
             return super(MultilingualManager, self).create(**kwargs)
         """
-    return MultilingualManager()
+    return MultilingualManager
 
 
 def pb_manager(superclass):
@@ -119,4 +119,4 @@ def pb_manager(superclass):
             name = get_language() + '_publish'
             return super(PublishManager, self).get_query_set()\
                 .filter(**{str(name): True})
-    return PublishManager()
+    return PublishManager
