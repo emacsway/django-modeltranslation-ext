@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -17,8 +18,22 @@ class TestModel(models.Model):
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('trans',)
 
-translator.translator._registry = {}
+OLD_LANGUAGE_CODE = settings.LANGUAGE_CODE
+OLD_LANGUAGES = settings.LANGUAGES
+OLD_USE_I18N = settings.USE_I18N
+
+settings.LANGUAGE_CODE = 'ru'
+settings.LANGUAGES = (
+    ('ru', u'Russian'),
+    ('en', u'English'),
+)
+settings.USE_I18N = True
+
 translator.translator.register(TestModel, TestTranslationOptions)
+
+settings.LANGUAGE_CODE = OLD_LANGUAGE_CODE
+settings.LANGUAGES = OLD_LANGUAGES
+settings.USE_I18N = OLD_USE_I18N
 
 
 @override_settings(
