@@ -35,8 +35,7 @@ class MultilingualQuerySet(QuerySet):
         if (args):
             args = list(args)
             for i, v in enumerate(args):
-                if v in trans_opts.fields:
-                    args[i] = self.localize_expr(v)
+                args[i] = self.localize_expr(v)
             return args
         else:
             for key in kwargs.keys():
