@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.db.models.sql.constants import LOOKUP_SEP
 
@@ -18,9 +19,15 @@ class MultilingualQuerySet(QuerySet):
 
     def localize_expr(self, name):
         """Localizes translatable field names in expressions"""
+        if isinstance(name, Q):
+            name.children = list(name.children)
+            for i, v in enumerate(name.children):
+                name.children[i] = (self.localize_expr(v[0]), v[1], )
+            return name
+
         if name[0] == '-':
             name = name[1:]
-            desc = '-'
+            desc = '-'  # ORDER BY ... DESC
         else:
             desc = ''
         parts = name.split(LOOKUP_SEP)
@@ -46,12 +53,12 @@ class MultilingualQuerySet(QuerySet):
     def filter(self, *args, **kwargs):
         """Localizes field names in filter method"""
         return super(MultilingualQuerySet, self)\
-            .filter(*args, **self._translate(**kwargs))
+            .filter(*self._translate(*args), **self._translate(**kwargs))
 
     def exclude(self, *args, **kwargs):
         """Localizes field names in exclude method"""
         return super(MultilingualQuerySet, self)\
-            .exclude(*args, **self._translate(**kwargs))
+            .exclude(*self._translate(*args), **self._translate(**kwargs))
 
     def order_by(self, *args):
         """Localizes field names in exclude method"""
