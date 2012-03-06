@@ -22,7 +22,10 @@ class MultilingualQuerySet(QuerySet):
         if isinstance(name, Q):
             name.children = list(name.children)
             for i, v in enumerate(name.children):
-                name.children[i] = (self.localize_expr(v[0]), v[1], )
+                if isinstance(v, Q):
+                    name.children[i] = self.localize_expr(v)
+                else:
+                    name.children[i] = (self.localize_expr(v[0]), v[1], )
             return name
 
         if name[0] == '-':
