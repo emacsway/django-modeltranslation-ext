@@ -10,11 +10,11 @@ from modeltranslation_ext.utils import localize_fieldname
 class MultilingualQuerySet(QuerySet):
     """Multilingual QuerySet"""
 
-    def localize_fieldname(self, name):
+    def localize_fieldname(self, name, lang=None):
         """Localizes translatable field name"""
         trans_opts = translator.get_options_for_model(self.model)
         if name in trans_opts.fields:
-            return localize_fieldname(name)
+            return localize_fieldname(name, lang)
         return name
 
     def localize_expr(self, name):
