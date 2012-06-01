@@ -43,8 +43,6 @@ class MultilingualQuerySet(QuerySet):
 
     def _translate(self, *args, **kwargs):
         """Localizes field names in args or kwargs"""
-        trans_opts = translator.get_options_for_model(self.model)
-
         if (args):
             args = list(args)
             for i, v in enumerate(args):
@@ -70,6 +68,14 @@ class MultilingualQuerySet(QuerySet):
         """Localizes field names in exclude method"""
         return super(MultilingualQuerySet, self)\
             .order_by(*self._translate(*args))
+
+    def detect_by(self, field):
+        """Limited select to current language."""
+        loc_field = self.localize_fieldname(field)
+        return super(MultilingualQuerySet, self).filter(
+            Q(**{"{0}__isnull".format(loc_field): False, }) &\
+            ~Q(**{"{0}__exact".format(loc_field): "", })
+        )
 
     def select_fast(self):
         """Speed optimization"""
