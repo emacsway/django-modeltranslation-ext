@@ -28,6 +28,9 @@ class MultilingualQuerySet(QuerySet):
                     name.children[i] = (self.localize_expr(v[0]), v[1], )
             return name
 
+        if name == "?":  # ORDER BY RAND()
+            return name
+
         if name[0] == '-':
             name = name[1:]
             desc = '-'  # ORDER BY ... DESC
