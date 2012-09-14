@@ -1,10 +1,11 @@
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.db.models.sql.constants import LOOKUP_SEP
 
 from modeltranslation.translator import translator
 from modeltranslation.utils import get_language
 from modeltranslation_ext.utils import localize_fieldname
+
+LOOKUP_SEP = '__'
 
 
 class MultilingualQuerySet(QuerySet):
