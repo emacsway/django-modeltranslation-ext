@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.db.models import Q
 from django.db.models.query import QuerySet
 
@@ -50,7 +51,7 @@ class MultilingualQuerySet(QuerySet):
                 args[i] = self.localize_expr(v)
             return args
         else:
-            for key in kwargs.keys():
+            for key in list(kwargs.keys()):
                 new_key = self.localize_expr(key)
                 kwargs[new_key] = kwargs.pop(key)
             return kwargs

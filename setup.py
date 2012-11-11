@@ -34,5 +34,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Localization',
     ],
-    url = "https://bitbucket.org/evotech/%s" % app_name,
+    url = "https://bitbucket.org/evotech/{0}".format(app_name),
 )

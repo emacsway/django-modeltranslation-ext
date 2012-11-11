@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.utils.translation import ugettext_lazy as _, string_concat
 from modeltranslation.translator import translator
 from modeltranslation.utils import get_language, build_localized_fieldname
@@ -18,7 +19,7 @@ def formfield_exclude_translations(db_field, **kwargs):
 
     trans_opts = translator.get_options_for_model(db_field.model)
     if db_field.name in trans_opts.fields:
-        field.widget.attrs['class'] = u'{0} {1}'.format(
+        field.widget.attrs['class'] = '{0} {1}'.format(
             getattr(field.widget.attrs, 'class', ''),
             'language-depended'
         )

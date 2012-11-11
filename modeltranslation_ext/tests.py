@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.db import models
 from django.test import TestCase
@@ -6,12 +7,12 @@ from django.utils import translation
 
 from modeltranslation import translator
 
-from managers import ml_manager
+from .managers import ml_manager
 
 
 class TestModel(models.Model):
-    untrans = models.CharField(u'untrans', max_length=255)
-    trans = models.CharField(u'trans', max_length=255)
+    untrans = models.CharField('untrans', max_length=255)
+    trans = models.CharField('trans', max_length=255)
     objects = ml_manager(models.Manager)()
 
 
@@ -24,8 +25,8 @@ OLD_USE_I18N = settings.USE_I18N
 
 settings.LANGUAGE_CODE = 'ru'
 settings.LANGUAGES = (
-    ('ru', u'Russian'),
-    ('en', u'English'),
+    ('ru', 'Russian'),
+    ('en', 'English'),
 )
 settings.USE_I18N = True
 
@@ -39,8 +40,8 @@ settings.USE_I18N = OLD_USE_I18N
 @override_settings(
     LANGUAGE_CODE='ru',
     LANGUAGES=(
-        ('ru', u'Russian'),
-        ('en', u'English'),
+        ('ru', 'Russian'),
+        ('en', 'English'),
     ),
     USE_I18N=True
 )
@@ -49,20 +50,20 @@ class ModeltranslationExtTest(TestCase):
     def setUp(self):
         self.data = [
             {'id': 1,
-             'untrans': u'untrans1',
-             'trans': u'trans1',
-             'trans_ru': u'trans1-ru',
-             'trans_en': u'trans1-en', },
+             'untrans': 'untrans1',
+             'trans': 'trans1',
+             'trans_ru': 'trans1-ru',
+             'trans_en': 'trans1-en', },
             {'id': 2,
-             'untrans': u'untrans2',
-             'trans': u'trans2',
-             'trans_ru': u'trans2-ru',
-             'trans_en': u'trans2-en', },
+             'untrans': 'untrans2',
+             'trans': 'trans2',
+             'trans_ru': 'trans2-ru',
+             'trans_en': 'trans2-en', },
             {'id': 3,
-             'untrans': u'untrans3',
-             'trans': u'trans3',
-             'trans_ru': u'trans3-ru',
-             'trans_en': u'trans3-en', },
+             'untrans': 'untrans3',
+             'trans': 'trans3',
+             'trans_ru': 'trans3-ru',
+             'trans_en': 'trans3-en', },
         ]
         for row in self.data:
             TestModel.objects.create(**row)

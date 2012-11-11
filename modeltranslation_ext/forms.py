@@ -1,5 +1,6 @@
+from __future__ import absolute_import, unicode_literals
 from django import forms
-from utils import formfield_exclude_translations
+from .utils import formfield_exclude_translations
 
 
 class TranslationModelForm(forms.ModelForm):

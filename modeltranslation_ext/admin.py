@@ -1,7 +1,8 @@
+from __future__ import absolute_import, unicode_literals
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from django.contrib.contenttypes import generic
-from utils import formfield_exclude_translations
+from .utils import formfield_exclude_translations
 
 
 class TranslationAdminBase(object):
