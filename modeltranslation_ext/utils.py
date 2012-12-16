@@ -25,6 +25,7 @@ def formfield_exclude_translations(db_field, **kwargs):
         )
         field.help_text = string_concat(
             field.help_text,
+            _(' '),
             _('This field dependent on current language.')
         )
     return field
