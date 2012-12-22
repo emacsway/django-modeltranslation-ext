@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
-from django.db.models import Q
+from django.db.models import Q, F
+from django.db.models.fields.related import RelatedField
 from django.db.models.query import QuerySet
 
 from modeltranslation.translator import translator
@@ -12,48 +13,67 @@ LOOKUP_SEP = '__'
 class MultilingualQuerySet(QuerySet):
     """Multilingual QuerySet"""
 
-    def localize_fieldname(self, name, lang=None):
+    def localize_fieldname(self, name, model=None, lang=None):
         """Localizes translatable field name"""
-        trans_opts = translator.get_options_for_model(self.model)
+        model = model or self.model
+        trans_opts = translator.get_options_for_model(model)
         if name in trans_opts.fields:
             return localize_fieldname(name, lang)
         return name
 
-    def localize_expr(self, name):
+    def localize_expr(self, expr):
         """Localizes translatable field names in expressions"""
-        if isinstance(name, Q):
-            name.children = list(name.children)
-            for i, v in enumerate(name.children):
-                if isinstance(v, Q):
-                    name.children[i] = self.localize_expr(v)
-                else:
-                    name.children[i] = (self.localize_expr(v[0]), v[1], )
-            return name
+        if isinstance(expr, Q):
+            expr.children = map(self.localize_expr, expr.children)
+            return expr
 
-        if name == "?":  # ORDER BY RAND()
-            return name
+        if isinstance(expr, F):
+            expr.name = self.localize_expr(expr.name)
+            return expr
 
-        if name[0] == '-':
-            name = name[1:]
+        if isinstance(expr, tuple) and len(expr) == 2:
+            return (self.localize_expr(expr[0]), self.localize_val(expr[1]), )
+
+        if expr == "?":  # ORDER BY RAND()
+            return expr
+
+        if expr[0] == '-':
+            expr = expr[1:]
             desc = '-'  # ORDER BY ... DESC
         else:
             desc = ''
-        parts = name.split(LOOKUP_SEP)
-        parts[0] = self.localize_fieldname(parts[0])
-        # TODO supports relations
+        parts = expr.split(LOOKUP_SEP)
+        parts = self.localize_related(parts)
+
         return "{0}{1}".format(desc, LOOKUP_SEP.join(parts))
+
+    def localize_related(self, parts, model=None):
+        """Localization for related fields"""
+        model = model or self.model
+        parts = parts[:]
+        parts[0] = self.localize_fieldname(parts[0], model)  # name__contains
+        if len(parts) > 1:  # related__name or related__name__contains
+            if parts[0] in model._meta.get_all_field_names():
+                field_object, modelclass, direct, m2m = model._meta.get_field_by_name(parts[0])
+                if direct and isinstance(field_object, RelatedField):
+                    parts[1:] = self.localize_related(
+                        parts[1:], field_object.related.parent_model
+                    )
+        return parts
+
+    def localize_val(self, val):
+        """Localizes translatable field names in values"""
+        if isinstance(val, (Q, F, )):
+            return self.localize_expr(val)
+        return val
 
     def _translate(self, *args, **kwargs):
         """Localizes field names in args or kwargs"""
-        if (args):
-            args = list(args)
-            for i, v in enumerate(args):
-                args[i] = self.localize_expr(v)
-            return args
+        if args:
+            return map(self.localize_expr, args)
         else:
             for key in list(kwargs.keys()):
-                new_key = self.localize_expr(key)
-                kwargs[new_key] = kwargs.pop(key)
+                kwargs[self.localize_expr(key)] = self.localize_val(kwargs.pop(key))
             return kwargs
 
     def filter(self, *args, **kwargs):
