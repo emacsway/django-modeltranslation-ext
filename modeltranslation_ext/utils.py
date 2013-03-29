@@ -4,6 +4,16 @@ from modeltranslation.translator import translator
 from modeltranslation.utils import get_language, build_localized_fieldname
 
 
+def populate_exclude(exclude, model):
+    """handles exclude"""
+    trans_opts = translator.get_options_for_model(model)
+    for fn in exclude[:]:
+        for tf in trans_opts.fields.get(fn, set()):
+            print '--', tf.name
+            exclude.append(tf.name)
+    return exclude
+
+
 def formfield_exclude_translations(db_field, **kwargs):
     """Filter form and keep only non-localized fields"""
     if hasattr(db_field, 'translated_field'):
