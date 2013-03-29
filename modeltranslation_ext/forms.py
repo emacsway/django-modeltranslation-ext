@@ -1,25 +1,38 @@
 from __future__ import absolute_import, unicode_literals
 from django import forms
+from django.forms.models import ModelFormMetaclass
 from .utils import (formfield_exclude_translations,
     formfield_exclude_original, formfield_exclude_irrelevant)
 
 
-class TranslationModelForm(forms.ModelForm):
+class TranslationBase(ModelFormMetaclass):
+    def __new__(cls, name, bases, attrs):
+        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_translations(self, **kw)
+        return ModelFormMetaclass.__new__(cls, name, bases, attrs)
+
+
+class TranslationModelForm(TranslationBase(b'NewBase', (forms.ModelForm,), {})):
     """Shows localized form"""
-    def formfield_callback(self, **kwargs):
-        """formfield_exclude_translations implementation"""
-        return formfield_exclude_translations(self, **kwargs)
+    pass
 
 
-class TranslationBulkModelForm(forms.ModelForm):
+class TranslationBulkBase(ModelFormMetaclass):
+    def __new__(cls, name, bases, attrs):
+        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_original(self, **kw)
+        return ModelFormMetaclass.__new__(cls, name, bases, attrs)
+
+
+class TranslationBulkModelForm(TranslationBulkBase(b'NewBase', (forms.ModelForm,), {})):
     """Shows localized form"""
-    def formfield_callback(self, **kwargs):
-        """formfield_exclude_translations implementation"""
-        return formfield_exclude_original(self, **kwargs)
+    pass
 
 
-class TranslationActualModelForm(forms.ModelForm):
+class TranslationActualBase(ModelFormMetaclass):
+    def __new__(cls, name, bases, attrs):
+        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_irrelevant(self, **kw)
+        return ModelFormMetaclass.__new__(cls, name, bases, attrs)
+
+
+class TranslationActualModelForm(TranslationActualBase(b'NewBase', (forms.ModelForm,), {})):
     """Shows localized form"""
-    def formfield_callback(self, **kwargs):
-        """formfield_exclude_translations implementation"""
-        return formfield_exclude_irrelevant(self, **kwargs)
+    pass
