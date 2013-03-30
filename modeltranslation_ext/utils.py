@@ -9,7 +9,6 @@ def populate_exclude(exclude, model):
     trans_opts = translator.get_options_for_model(model)
     for fn in exclude[:]:
         for tf in trans_opts.fields.get(fn, set()):
-            print '--', tf.name
             exclude.append(tf.name)
     return exclude
 
