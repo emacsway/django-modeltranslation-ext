@@ -110,7 +110,7 @@ def ml_manager(superclass):
     class MultilingualManager(superclass):
         """Multilingual manager"""
 
-        def get_queryset(self):
+        def get_query_set(self):
             """Returns a new QuerySet object.
 
             Subclasses can override this method
@@ -120,15 +120,15 @@ def ml_manager(superclass):
 
         def localize_fieldname(self, name):
             """Localizes translatable field name"""
-            return self.get_queryset().localize_fieldname(name)
+            return self.get_query_set().localize_fieldname(name)
 
         def localize_expr(self, name):
             """Localizes translatable field names in expressions"""
-            return self.get_queryset().localize_expr(name)
+            return self.get_query_set().localize_expr(name)
 
         def select_fast(self, qs):
             """Speed optimization"""
-            return self.get_queryset().filter(pk__in=qs)
+            return self.get_query_set().filter(pk__in=qs)
 
         """
         def create(self, **kwargs):
@@ -155,8 +155,8 @@ def pb_manager(superclass):
         """
             Includes only objects marked as publish on current
         """
-        def get_queryset(self):
+        def get_query_set(self):
             name = get_language() + '_publish'
-            return super(PublishManager, self).get_queryset()\
+            return super(PublishManager, self).get_query_set()\
                 .filter(**{str(name): True})
     return PublishManager
