@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 from django import forms
 from django.forms.models import ModelFormMetaclass
+from django.db.models.fields import FieldDoesNotExist
 from .utils import (formfield_exclude_translations,
     formfield_exclude_original, formfield_exclude_irrelevant, populate_exclude)
 
@@ -11,7 +12,7 @@ class TranslationBase(ModelFormMetaclass):
         if exclude:
             populate_exclude(exclude, attrs['Meta'].model)
             attrs['Meta'].exclude = exclude
-        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_translations(self, **kw)
+        attrs['formfield_callback'] = formfield_exclude_translations
         return ModelFormMetaclass.__new__(cls, name, bases, attrs)
 
 
@@ -26,13 +27,26 @@ class TranslationBulkBase(ModelFormMetaclass):
         if exclude:
             populate_exclude(exclude, attrs['Meta'].model)
             attrs['Meta'].exclude = exclude
-        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_original(self, **kw)
+        attrs['formfield_callback'] = formfield_exclude_original
         return ModelFormMetaclass.__new__(cls, name, bases, attrs)
 
 
 class TranslationBulkModelForm(TranslationBulkBase(b'NewBase', (forms.ModelForm,), {})):
     """Shows localized form"""
-    pass
+    def __init__(self, *args, **kwargs):
+        super(TranslationBulkModelForm, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            try:
+                new_field = formfield_exclude_original(
+                    self._meta.model._meta.get_field(name),
+                    field=field
+                )
+            except FieldDoesNotExist:
+                new_field = field
+            if new_field:
+                self.fields[name] = new_field
+            else:
+                del self.fields[name]
 
 
 class TranslationActualBase(ModelFormMetaclass):
@@ -41,10 +55,22 @@ class TranslationActualBase(ModelFormMetaclass):
         if exclude:
             populate_exclude(exclude, attrs['Meta'].model)
             attrs['Meta'].exclude = exclude
-        attrs['formfield_callback'] = lambda self, **kw: formfield_exclude_irrelevant(self, **kw)
         return ModelFormMetaclass.__new__(cls, name, bases, attrs)
 
 
 class TranslationActualModelForm(TranslationActualBase(b'NewBase', (forms.ModelForm,), {})):
     """Shows localized form"""
-    pass
+    def __init__(self, *args, **kwargs):
+        super(TranslationBulkModelForm, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            try:
+                new_field = formfield_exclude_irrelevant(
+                    self._meta.model._meta.get_field(name),
+                    field=field
+                )
+            except FieldDoesNotExist:
+                new_field = field
+            if new_field:
+                self.fields[name] = new_field
+            else:
+                del self.fields[name]
